@@ -3,7 +3,11 @@ const { Server } = require("socket.io");
 require("dotenv").config();
 
 const io = new Server({
-  cors: "*",
+  cors: {
+    origin: "*", 
+    methods: ["GET", "POST"],    
+    credentials: true,            
+  },
 });
 const port = process.env.PORT || 8000;
 
