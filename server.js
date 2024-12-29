@@ -141,26 +141,26 @@ io.on("connection", (socket) => {
     })
   });
 
-  socket.on("typing", ({user, recipient}) => {
+  socket.on("typing", ({user,chatId, recipient}) => {
     recipient?.forEach((recipientId) => {
       const recipientSocket = onlineUsers?.find(
         (user) => user.userId == recipientId
       );
       
       if (recipientSocket) {
-        io.to(recipientSocket.socketId).emit("receiveTyping", user);
+        io.to(recipientSocket.socketId).emit("receiveTyping", {chatId,user});
       }
     })
   });
 
-  socket.on("stopTyping", ({user, recipient}) =>{
+  socket.on("stopTyping", ({user,chatId, recipient}) =>{
     recipient?.forEach((recipientId) => {
       const recipientSocket = onlineUsers?.find(
         (user) => user.userId == recipientId
       );
       
       if (recipientSocket) {
-        io.to(recipientSocket.socketId).emit("receiveStopTyping", user);
+        io.to(recipientSocket.socketId).emit("receiveStopTyping", {user, chatId});
       }
     })
   });
