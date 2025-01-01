@@ -218,7 +218,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("blocked", ({ chatId, recipient, notify}) => {
+  socket.on("blockUser", ({ chatId, recipient, notify}) => {
     const recipientSocket = onlineUsers?.find(user => user.userId == recipient);
     
     if (recipientSocket) {
@@ -226,7 +226,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("unblocked", ({ chatId, recipient, notify}) => {
+  socket.on("unblockUser", ({ chatId, recipient, notify}) => {
     const recipientSocket = onlineUsers?.find(user => user.userId == recipient);
     
     if (recipientSocket) {
@@ -247,3 +247,4 @@ io.on("connection", (socket) => {
 });
 
 io.listen(port);
+console.log(`Socket.IO server is running on port ${port}`);
