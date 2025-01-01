@@ -218,6 +218,21 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("blocked", ({ chatId, recipient, notify}) => {
+    const recipientSocket = onlineUsers?.find(user => user.userId == recipient);
+    
+    if (recipientSocket) {
+      io.to(recipientSocket.socketId).emit("receiveBlocked", { chatId, notify});
+    }
+  });
+
+  socket.on("unblocked", ({ chatId, recipient, notify}) => {
+    const recipientSocket = onlineUsers?.find(user => user.userId == recipient);
+    
+    if (recipientSocket) {
+      io.to(recipientSocket.socketId).emit("receiveUnblocked", { chatId, notify});
+    }
+  })
 
 
   socket.on("disconnect", () => {
