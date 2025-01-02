@@ -1,4 +1,4 @@
-//const { response } = require("express");
+
 const { Server } = require("socket.io");
 require("dotenv").config();
 
@@ -25,6 +25,8 @@ io.on("connection", (socket) => {
       onlineUsers.push({ userId, socketId: socket.id });
       io.emit("user_online_status", onlineUsers);
     }
+    console.log("user_online_status", onlineUsers);
+    
   });
 
   socket.on("sendMessage", (res) => {
@@ -32,7 +34,7 @@ io.on("connection", (socket) => {
 
     recipients.forEach((recipient) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId === recipient.userId
+        (user) => user.userId === recipient.userId._id
       );
       if (recipientSocket) {
         console.log(message.chat_id);
@@ -46,7 +48,7 @@ io.on("connection", (socket) => {
     const { recipients, message } = res;
     recipients.forEach((recipient) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId === recipient.userId
+        (user) => user.userId === recipient.userId._id
       );
       if (recipientSocket) {
         io.to(recipientSocket.socketId).emit("receiveReact", message);
@@ -57,7 +59,7 @@ io.on("connection", (socket) => {
   socket.on("readMessage", ({ message, recipients }) => {
     recipients?.forEach((recipient) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId === recipient.userId
+        (user) => user.userId === recipient.userId._id
       );
       if (recipientSocket) {
         io.to(recipientSocket.socketId).emit("receiveRead", message);
@@ -68,7 +70,7 @@ io.on("connection", (socket) => {
   socket.on("removeMessage",({message, recipients}) => {
     recipients?.forEach((recipient) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId === recipient.userId
+        (user) => user.userId === recipient.userId._id
       );
       if (recipientSocket) {
         io.to(recipientSocket.socketId).emit("receiveRemove", message);
@@ -77,8 +79,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("createGroup", ({chat, recipient}) => {
-    console.log("recipients", recipient);
-    console.log("online user", onlineUsers);
     
     recipient?.forEach((recipientId) => {
       const recipientSocket = onlineUsers?.find(
@@ -93,10 +93,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("deleteGroup", ({chat, recipient}) => {
-    console.log("recipients", recipient);
     recipient?.forEach((recipientId) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId == recipientId.userId
+        (user) => user.userId == recipientId.userId._id
       );
       
       if (recipientSocket) {
@@ -108,7 +107,7 @@ io.on("connection", (socket) => {
   socket.on("kickGroup", ({chat,kickedUser, recipient}) => {
     recipient?.forEach((recipientId) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId == recipientId.userId
+        (user) => user.userId == recipientId.userId._id
       );
       
       if (recipientSocket) {
@@ -129,14 +128,14 @@ io.on("connection", (socket) => {
     })
   });
 
-  socket.on("leaveGroup", ({chatId, userId, recipient}) => {
+  socket.on("leaveGroup", ({ notify, recipient}) => {
     recipient?.forEach((recipientId) => {
       const recipientSocket = onlineUsers?.find(
-        (user) => user.userId == recipientId.userId
+        (user) => user.userId == recipientId.userId._id
       );
       
       if (recipientSocket) {
-        io.to(recipientSocket.socketId).emit("groupLeft", {chatId, userId});
+        io.to(recipientSocket.socketId).emit("groupLeft", { notify});
       }
     })
   });
@@ -226,11 +225,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("unblockUser", ({ chatId, recipient, notify}) => {
+  socket.on("unblockUser", ({ chatId, recipient}) => {
     const recipientSocket = onlineUsers?.find(user => user.userId == recipient);
     
     if (recipientSocket) {
-      io.to(recipientSocket.socketId).emit("receiveUnblocked", { chatId, notify});
+      io.to(recipientSocket.socketId).emit("receiveUnblocked", { chatId});
     }
   })
 
@@ -247,4 +246,3 @@ io.on("connection", (socket) => {
 });
 
 io.listen(port);
-console.log(`Socket.IO server is running on port ${port}`);
